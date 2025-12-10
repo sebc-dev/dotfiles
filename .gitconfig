@@ -1,0 +1,14 @@
+[user]
+	name = sebc-dev
+	email = chauveau.sebastien@gmail.com
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[coderabbit]
+	machineId = cli/59c91924dedc453393a2d5e7531be91b
+[core]
+	autocrlf = true
+	editor = code --wait

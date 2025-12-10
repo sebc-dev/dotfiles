@@ -1,0 +1,99 @@
+# ~/.config/starship.toml - Gruvbox Material Dark Theme (Powerline)
+
+add_newline = true
+
+format = """
+$directory\
+[\ue0b0](fg:#7daea3 bg:#a9b665)\
+$git_branch\
+$git_status\
+[\ue0b0](fg:#a9b665)\
+$fill\
+$cmd_duration\
+$line_break\
+$time\
+$username\
+$hostname\
+$character"""
+
+# --- FILL ---
+[fill]
+symbol = ' '
+
+# --- USER & HOST (SSH only) ---
+[username]
+show_always = false
+style_user = "fg:#e78a4e bold"
+style_root = "fg:#ea6962 bold"
+format = '[$user]($style)'
+
+[hostname]
+ssh_only = true
+style = "fg:#e78a4e"
+format = '[@$hostname]($style) '
+
+# --- DIRECTORY ---
+[directory]
+style = "bg:#7daea3 fg:#282828 bold"
+format = '[ $path ]($style)'
+truncation_length = 3
+truncation_symbol = "…/"
+read_only = " \uf023"
+read_only_style = "fg:#ea6962 bg:#7daea3"
+
+# --- GIT BRANCH ---
+[git_branch]
+symbol = "\ue0a0"
+style = "bg:#a9b665 fg:#282828"
+format = '[ $symbol $branch]($style)'
+
+# --- GIT STATUS (avec commits ahead/behind) ---
+[git_status]
+style = "bg:#a9b665 fg:#282828 bold"
+format = '([ $all_status$ahead_behind]($style))'
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇡${ahead_count}⇣${behind_count}"
+up_to_date = ""
+untracked = "? ${count}"
+stashed = "\U000f0197 ${count}"
+modified = "! ${count}"
+staged = "+ ${count}"
+renamed = "» ${count}"
+deleted = "✘ ${count}"
+conflicted = "= ${count}"
+
+# --- CMD DURATION ---
+[cmd_duration]
+min_time = 500
+style = "fg:#928374"
+format = '[$duration ]($style)'
+
+# --- TIME ---
+[time]
+disabled = false
+style = "fg:#928374"
+format = '[$time ]($style)'
+time_format = "%H:%M"
+
+# --- PROMPT CHARACTER ---
+[character]
+success_symbol = "[❯](fg:#a9b665)"
+error_symbol = "[❯](fg:#ea6962)"
+vimcmd_symbol = "[❮](fg:#a9b665)"
+
+# --- DÉSACTIVÉS ---
+[package]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[python]
+disabled = true
+
+[rust]
+disabled = true
+
+[golang]
+disabled = true
