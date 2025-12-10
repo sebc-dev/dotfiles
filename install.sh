@@ -51,8 +51,8 @@ print_step "Installation des dotfiles..."
 
 if [ -d "$HOME/.dotfiles" ]; then
     print_warning "Dotfiles déjà présents. Mise à jour..."
-    dotfiles fetch origin master
-    dotfiles reset --hard origin/master
+    dotfiles fetch origin
+    dotfiles reset --hard FETCH_HEAD
     print_success "Dotfiles mis à jour"
 else
     git clone --bare https://github.com/sebc-dev/dotfiles.git "$HOME/.dotfiles"
