@@ -10,5 +10,5 @@
 [coderabbit]
 	machineId = cli/59c91924dedc453393a2d5e7531be91b
 [core]
-	autocrlf = true
+	autocrlf = input
 	editor = code --wait
