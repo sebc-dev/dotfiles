@@ -1,7 +1,9 @@
 #!/bin/bash
 #
 # Script d'installation des dotfiles et outils shell
-# Usage: curl -fsSL https://raw.githubusercontent.com/sebc-dev/dotfiles/master/.dotfiles-install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/sebc-dev/dotfiles/master/install.sh | bash
+#
+# Peut être relancé plusieurs fois sans problème (idempotent)
 #
 
 set -e
@@ -34,20 +36,28 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# --- 1. DOTFILES ---
-print_step "Installation des dotfiles..."
-
-if [ -d "$HOME/.dotfiles" ]; then
-    print_warning "Le dossier ~/.dotfiles existe déjà. Skipping clone."
-else
-    git clone --bare https://github.com/sebc-dev/dotfiles.git "$HOME/.dotfiles"
-    print_success "Repo dotfiles cloné"
-fi
+# Détecter WSL
+is_wsl() {
+    grep -qEi "(Microsoft|WSL)" /proc/version 2>/dev/null
+}
 
 # Fonction dotfiles
 dotfiles() {
     git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" "$@"
 }
+
+# --- 1. DOTFILES ---
+print_step "Installation des dotfiles..."
+
+if [ -d "$HOME/.dotfiles" ]; then
+    print_warning "Dotfiles déjà présents. Mise à jour..."
+    dotfiles fetch origin master
+    dotfiles reset --hard origin/master
+    print_success "Dotfiles mis à jour"
+else
+    git clone --bare https://github.com/sebc-dev/dotfiles.git "$HOME/.dotfiles"
+    print_success "Repo dotfiles cloné"
+fi
 
 # Backup des fichiers existants si conflit
 print_step "Checkout des dotfiles..."
@@ -55,9 +65,11 @@ if ! dotfiles checkout 2>/dev/null; then
     print_warning "Conflit détecté. Backup des fichiers existants..."
     mkdir -p "$HOME/.dotfiles-backup"
     dotfiles checkout 2>&1 | grep -E "^\s+" | awk '{print $1}' | while read -r file; do
-        mkdir -p "$HOME/.dotfiles-backup/$(dirname "$file")"
-        mv "$HOME/$file" "$HOME/.dotfiles-backup/$file"
-        print_warning "Backup: $file -> .dotfiles-backup/$file"
+        if [ -f "$HOME/$file" ]; then
+            mkdir -p "$HOME/.dotfiles-backup/$(dirname "$file")"
+            mv "$HOME/$file" "$HOME/.dotfiles-backup/$file"
+            print_warning "Backup: $file -> .dotfiles-backup/$file"
+        fi
     done
     dotfiles checkout
 fi
@@ -120,14 +132,15 @@ else
 fi
 
 # --- 7. OUTILS CLI ---
-print_step "Installation des outils CLI (eza, ripgrep, tmux, fzf, bat)..."
+print_step "Installation des outils CLI (eza, ripgrep, tmux, fzf, bat, fd)..."
 sudo apt update
 sudo apt install -y eza ripgrep tmux fzf bat fd-find
 print_success "Outils CLI installés"
 
 # --- 8. NVM & NODE ---
 print_step "Installation de NVM et Node.js..."
-if [ -d "$HOME/.nvm" ]; then
+export NVM_DIR="$HOME/.nvm"
+if [ -d "$NVM_DIR" ]; then
     print_success "NVM déjà installé"
 else
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
@@ -135,7 +148,6 @@ else
 fi
 
 # Charger NVM et installer Node
-export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 if command_exists node; then
     print_success "Node.js déjà installé ($(node --version))"
@@ -163,12 +175,39 @@ fi
 
 # --- 10. CHANGER LE SHELL PAR DÉFAUT ---
 print_step "Configuration du shell par défaut..."
-if [ "$SHELL" = "$(which zsh)" ]; then
+ZSH_PATH=$(which zsh)
+
+# Vérifier si zsh est déjà le shell par défaut
+CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+if [ "$CURRENT_SHELL" = "$ZSH_PATH" ]; then
     print_success "Zsh est déjà le shell par défaut"
 else
-    print_warning "Changement du shell par défaut vers Zsh..."
-    chsh -s "$(which zsh)"
-    print_success "Shell par défaut changé vers Zsh"
+    # Méthode 1: chsh classique
+    if chsh -s "$ZSH_PATH" 2>/dev/null; then
+        print_success "Shell par défaut changé vers Zsh (via chsh)"
+    else
+        # Méthode 2: Pour WSL, modifier /etc/passwd directement ou via usermod
+        if is_wsl; then
+            print_warning "WSL détecté. Tentative alternative..."
+            if sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null; then
+                print_success "Shell par défaut changé vers Zsh (via usermod)"
+            else
+                # Méthode 3: Ajouter exec zsh dans .bashrc pour WSL
+                if ! grep -q "exec zsh" "$HOME/.bashrc" 2>/dev/null; then
+                    echo '' >> "$HOME/.bashrc"
+                    echo '# Lancer zsh automatiquement (WSL fix)' >> "$HOME/.bashrc"
+                    echo 'if [ -t 1 ] && [ -x "$(command -v zsh)" ]; then' >> "$HOME/.bashrc"
+                    echo '    exec zsh' >> "$HOME/.bashrc"
+                    echo 'fi' >> "$HOME/.bashrc"
+                    print_success "Zsh sera lancé automatiquement via .bashrc (WSL workaround)"
+                else
+                    print_success "Workaround WSL déjà en place dans .bashrc"
+                fi
+            fi
+        else
+            print_error "Impossible de changer le shell par défaut. Lance 'chsh -s $(which zsh)' manuellement."
+        fi
+    fi
 fi
 
 # --- TERMINÉ ---
@@ -178,7 +217,7 @@ echo -e "${GREEN}   Installation terminée avec succès!   ${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "Pour appliquer les changements:"
-echo -e "  ${YELLOW}exec zsh${NC}  ou ouvre un nouveau terminal"
+echo -e "  ${YELLOW}Ferme et réouvre ton terminal${NC}"
 echo ""
 echo "Commandes dotfiles disponibles:"
 echo -e "  ${BLUE}dotfiles status${NC}      - Voir les modifications"
