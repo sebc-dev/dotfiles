@@ -27,7 +27,7 @@ alias gs="git status --short --branch"
 alias gl="git log --oneline --graph --decorate -15"
 alias gd="git diff"
 alias gds="git diff --staged"
-
+alias gpr="git pull -r"
 # --- Dotfiles (bare repo) ---
 alias dotfiles='git --git-dir=$HOME/.dotfiles --work-tree=$HOME'
 alias ds='dotfiles status --short'
