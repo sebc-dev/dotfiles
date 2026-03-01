@@ -38,8 +38,8 @@ fi
 ARCH=$(dpkg --print-architecture 2>/dev/null || uname -m)
 print_success "Architecture détectée : $ARCH"
 
-sudo apt update -qq
-sudo apt install -y -qq git curl unzip >/dev/null
+sudo apt update
+sudo apt install -y git curl unzip
 print_success "Prérequis installés"
 
 # --- 1. DOTFILES ---
