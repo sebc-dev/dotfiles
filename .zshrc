@@ -121,7 +121,6 @@ export PATH="$PATH:/mnt/c/Program Files/Docker/Docker/resources/bin"
 alias explorer="/mnt/c/Windows/explorer.exe"
 alias powershell="/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
 alias clip="/mnt/c/Windows/System32/clip.exe"
-# --- 2. Configuration NVM (DOIT être à la fin) ---
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# --- 2. Configuration Volta ---
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"

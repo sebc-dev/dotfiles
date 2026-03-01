@@ -46,6 +46,11 @@ dotfiles() {
     git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" "$@"
 }
 
+# --- 0. MISE À JOUR APT ---
+print_step "Mise à jour des paquets apt..."
+sudo apt update
+print_success "Paquets apt mis à jour"
+
 # --- 1. DOTFILES ---
 print_step "Installation des dotfiles..."
 
@@ -81,7 +86,7 @@ print_step "Installation de Zsh..."
 if command_exists zsh; then
     print_success "Zsh déjà installé ($(zsh --version))"
 else
-    sudo apt update && sudo apt install -y zsh
+    sudo apt install -y zsh
     print_success "Zsh installé"
 fi
 
@@ -132,30 +137,26 @@ else
 fi
 
 # --- 7. OUTILS CLI ---
-print_step "Installation des outils CLI (eza, ripgrep, tmux, fzf, bat, fd)..."
-sudo apt update
-sudo apt install -y eza ripgrep tmux fzf bat fd-find
+print_step "Installation des outils CLI (eza, ripgrep, fzf, bat, fd, unzip)..."
+sudo apt install -y eza ripgrep fzf bat fd-find unzip
 print_success "Outils CLI installés"
 
-# --- 8. NVM & NODE ---
-print_step "Installation de NVM et Node.js..."
-export NVM_DIR="$HOME/.nvm"
-if [ -d "$NVM_DIR" ]; then
-    print_success "NVM déjà installé"
+# --- 8. VOLTA & NODE ---
+print_step "Installation de Volta et Node.js..."
+export VOLTA_HOME="$HOME/.volta"
+if [ -d "$VOLTA_HOME" ]; then
+    print_success "Volta déjà installé"
 else
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-    print_success "NVM installé"
+    curl https://get.volta.sh | bash
+    print_success "Volta installé"
 fi
 
-# Charger NVM et installer Node
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+export PATH="$VOLTA_HOME/bin:$PATH"
 if command_exists node; then
     print_success "Node.js déjà installé ($(node --version))"
 else
-    nvm install 22
-    nvm use 22
-    nvm alias default 22
-    print_success "Node.js 22 installé"
+    volta install node
+    print_success "Node.js installé via Volta"
 fi
 
 # --- 9. FONTS (JetBrains Mono Nerd) ---
@@ -165,10 +166,12 @@ if ls "$FONT_DIR"/JetBrains* >/dev/null 2>&1; then
     print_success "JetBrains Mono Nerd Font déjà installée"
 else
     mkdir -p "$FONT_DIR"
-    cd "$FONT_DIR"
-    curl -fLO https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/JetBrainsMono.zip
-    unzip -o JetBrainsMono.zip
-    rm JetBrainsMono.zip
+    (
+        cd "$FONT_DIR"
+        curl -fLO https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/JetBrainsMono.zip
+        unzip -o JetBrainsMono.zip
+        rm JetBrainsMono.zip
+    )
     fc-cache -fv >/dev/null 2>&1
     print_success "JetBrains Mono Nerd Font installée"
 fi
