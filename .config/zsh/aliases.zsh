@@ -1,8 +1,7 @@
 # ~/.config/zsh/aliases.zsh - Alias personnels
 
-# --- Navigation (zoxide) ---
-alias cd="z"
-alias zi="z -i"
+# --- Navigation (zoxide via --cmd cd) ---
+alias cdi="cdi"
 alias ..="cd .."
 alias ...="cd ../.."
 
@@ -50,3 +49,7 @@ alias h="history | tail -20"
 alias rm="rm -i"
 alias mv="mv -i"
 alias cp="cp -i"
+
+# --- Claude Code ---
+alias cc="clear && claude"
+alias ccy="clear && claude --dangerously-skip-permissions"
