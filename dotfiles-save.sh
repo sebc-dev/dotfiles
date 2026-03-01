@@ -11,6 +11,13 @@
 
 set -euo pipefail
 
+# --- Vérification de la locale ---
+if ! locale -a 2>/dev/null | grep -qi "fr_FR.utf-\?8"; then
+    echo -e "\033[0;31m[✗]\033[0m Locale fr_FR.UTF-8 manquante."
+    echo "  Exécute d'abord : sudo locale-gen fr_FR.UTF-8"
+    exit 1
+fi
+
 # Couleurs
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
