@@ -1,14 +1,74 @@
 [user]
 	name = sebc-dev
 	email = chauveau.sebastien@gmail.com
+
 [credential "https://github.com"]
-	helper = 
+	helper =
 	helper = !/usr/bin/gh auth git-credential
+
 [credential "https://gist.github.com"]
-	helper = 
+	helper =
 	helper = !/usr/bin/gh auth git-credential
-[coderabbit]
-	machineId = cli/59c91924dedc453393a2d5e7531be91b
+
 [core]
 	autocrlf = input
 	editor = code --wait
+	excludesFile = ~/.config/git/ignore
+	pager = less -FRX
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	default = current
+	autoSetupRemote = true
+	followTags = true
+
+[fetch]
+	prune = true
+	pruneTags = true
+
+[rebase]
+	autoStash = true
+	autoSquash = true
+
+[merge]
+	conflictstyle = zdiff3
+	tool = code
+
+[diff]
+	algorithm = histogram
+	colorMoved = default
+	renames = copies
+
+[rerere]
+	enabled = true
+
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = -version:refname
+
+[log]
+	date = iso
+
+[alias]
+	# Visualisation
+	lg = log --oneline --graph --decorate --all -20
+	last = log -1 --stat
+	# Workflow
+	undo = reset --soft HEAD~1
+	amend = commit --amend --no-edit
+	wip = !git add -A && git commit -m 'chore: wip [skip ci]'
+	# Nettoyage
+	gone = !git fetch -p && git branch -vv | grep ': gone]' | awk '{print $1}'
+	prune-branches = !git gone | xargs -r git branch -D
+	# Info
+	aliases = config --get-regexp ^alias\\.
+
+[coderabbit]
+	machineId = cli/59c91924dedc453393a2d5e7531be91b
